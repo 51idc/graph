@@ -43,3 +43,6 @@ _testmain.go
 tmp
 cfg.json
 gitversion
+
+.vscode/
+debug

@@ -16,7 +16,7 @@ graph组件，使用rrdtool，来存储监控历史数据。主要功能，如�
 ----
 graph主要的模块结构（含数据流）如下。
 
-![falcon.graph.arch](https://raw.githubusercontent.com/niean/niean.common.store/master/images/open-falcon/graph/graph.arch.png)
+![falcon.graph.arch](https://raw.githubusercontent.com/niean/niean.common.store/master/images/anchnet/graph/graph.arch.png)
 
 graph的模块，主要分为两个功能：数据接收、数据查询。
 

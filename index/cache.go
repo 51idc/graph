@@ -3,7 +3,7 @@ package index
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	log "github.com/cihub/seelog"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,8 +13,8 @@ import (
 
 	cmodel "github.com/open-falcon/common/model"
 	cutils "github.com/open-falcon/common/utils"
-	"github.com/open-falcon/graph/g"
-	"github.com/open-falcon/graph/proc"
+	"github.com/anchnet/graph/g"
+	"github.com/anchnet/graph/proc"
 )
 
 const (
@@ -83,7 +83,7 @@ func GetEndpointFromCache(endpoint string) (int64, bool) {
 	var id int64 = -1
 	err := g.DB.QueryRow("SELECT id FROM endpoint WHERE endpoint = ?", endpoint).Scan(&id)
 	if err != nil && err != sql.ErrNoRows {
-		log.Println("query endpoint id fail,", err)
+		log.Info("query endpoint id fail,", err)
 		return -1, false
 	}
 
@@ -118,7 +118,7 @@ func GetCounterFromCache(endpointId int64, counter string) (dsType string, step 
 	err = g.DB.QueryRow("SELECT type, step FROM endpoint_counter WHERE endpoint_id = ? and counter = ?",
 		endpointId, counter).Scan(&dsType, &step)
 	if err != nil && err != sql.ErrNoRows {
-		log.Println("query type and step fail", err)
+		log.Info("query type and step fail", err)
 		return
 	}
 

@@ -2,13 +2,13 @@ package api
 
 import (
 	"container/list"
-	"log"
+	log "github.com/cihub/seelog"
 	"net"
 	"net/rpc"
 	"sync"
 	"time"
 
-	"github.com/open-falcon/graph/g"
+	"github.com/anchnet/graph/g"
 )
 
 type conn_list struct {
@@ -38,20 +38,20 @@ func init() {
 
 func Start() {
 	if !g.Config().Rpc.Enabled {
-		log.Println("rpc.Start warning, not enabled")
+		log.Info("rpc.Start warning, not enabled")
 		return
 	}
 	addr := g.Config().Rpc.Listen
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
-		log.Fatalf("rpc.Start error, net.ResolveTCPAddr failed, %s", err)
+		log.Errorf("rpc.Start error, net.ResolveTCPAddr failed, %s", err)
 	}
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		log.Fatalf("rpc.Start error, listen %s failed, %s", addr, err)
+		log.Errorf("rpc.Start error, listen %s failed, %s", addr, err)
 	} else {
-		log.Println("rpc.Start ok, listening on", addr)
+		log.Info("rpc.Start ok, listening on", addr)
 	}
 
 	rpc.Register(new(Graph))
@@ -83,7 +83,7 @@ func Start() {
 
 	select {
 	case <-Close_chan:
-		log.Println("rpc, recv sigout and exiting...")
+		log.Info("rpc, recv sigout and exiting...")
 		listener.Close()
 		Close_done_chan <- 1
 

@@ -2,17 +2,17 @@ package index
 
 import (
 	"fmt"
-	"log"
+	log "github.com/cihub/seelog"
 
 	cmodel "github.com/open-falcon/common/model"
-	"github.com/open-falcon/graph/g"
+	"github.com/anchnet/graph/g"
 )
 
 // 初始化索引功能模块
 func Start() {
 	InitCache()
 	go StartIndexUpdateIncrTask()
-	log.Println("index.Start ok")
+	log.Info("index.Start ok")
 }
 
 // index收到一条新上报的监控数据,尝试用于增量更新索引

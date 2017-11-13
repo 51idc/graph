@@ -57,7 +57,7 @@ function start() {
         return 1
     fi
 
-    nohup ./$app -c $conf >>$logfile 2>&1 &
+    nohup ./$app -c $conf &> /dev/null &
     echo $! > $pidfile
     echo "start ok, pid=$!"
 }

@@ -1,10 +1,5 @@
 package g
 
-import (
-	"log"
-	"runtime"
-)
-
 // TODO
 // change graph.store cache struct(key: md5->uuid)
 // flush when query happens seems unreasonable
@@ -37,8 +32,3 @@ const (
 	GRAPH_F_SENDING
 	GRAPH_F_FETCHING
 )
-
-func init() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-}

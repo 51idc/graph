@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/open-falcon/graph/index"
+	"github.com/anchnet/graph/index"
 )
 
 func configIndexRoutes() {

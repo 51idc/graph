@@ -2,17 +2,18 @@ package rrdtool
 
 import (
 	"errors"
-	"log"
 	"math"
 	"sync/atomic"
 	"time"
+
+	log "github.com/cihub/seelog"
 
 	cmodel "github.com/open-falcon/common/model"
 	"github.com/open-falcon/rrdlite"
 	"github.com/toolkits/file"
 
-	"github.com/open-falcon/graph/g"
-	"github.com/open-falcon/graph/store"
+	"github.com/anchnet/graph/g"
+	"github.com/anchnet/graph/store"
 )
 
 var (
@@ -44,7 +45,7 @@ func Start() {
 	var err error
 	// check data dir
 	if err = file.EnsureDirRW(cfg.RRD.Storage); err != nil {
-		log.Fatalln("rrdtool.Start error, bad data dir "+cfg.RRD.Storage+",", err)
+		log.Error("rrdtool.Start error, bad data dir "+cfg.RRD.Storage+",", err)
 	}
 
 	migrate_start(cfg)
@@ -52,7 +53,7 @@ func Start() {
 	// sync disk
 	go syncDisk()
 	go ioWorker()
-	log.Println("rrdtool.Start ok")
+	log.Info("rrdtool.Start ok")
 }
 
 // RRA.Point.Size
@@ -223,11 +224,11 @@ func FlushAll(force bool) {
 	for i := 0; i < store.GraphItems.Size; i++ {
 		FlushRRD(i, force)
 		if i%n == 0 {
-			log.Printf("flush hash idx:%03d size:%03d disk:%08d net:%08d\n",
+			log.Infof("flush hash idx:%03d size:%03d disk:%08d net:%08d\n",
 				i, store.GraphItems.Size, disk_counter, net_counter)
 		}
 	}
-	log.Printf("flush hash done (disk:%08d net:%08d)\n", disk_counter, net_counter)
+	log.Infof("flush hash done (disk:%08d net:%08d)\n", disk_counter, net_counter)
 }
 
 func CommitByKey(key string) {
@@ -266,7 +267,7 @@ func PullByKey(key string) {
 	go func() {
 		err := <-done
 		if err != nil {
-			log.Printf("get %s from remote err[%s]\n", key, err)
+			log.Infof("get %s from remote err[%s]\n", key, err)
 			return
 		}
 		atomic.AddUint64(&net_counter, 1)

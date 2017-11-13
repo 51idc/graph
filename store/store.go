@@ -4,12 +4,13 @@ import (
 	"container/list"
 	"errors"
 	"hash/crc32"
-	"log"
 	"sync"
+
+	log "github.com/cihub/seelog"
 
 	cmodel "github.com/open-falcon/common/model"
 
-	"github.com/open-falcon/graph/g"
+	"github.com/anchnet/graph/g"
 )
 
 var GraphItems *GraphItemMap
@@ -147,7 +148,7 @@ func (this *GraphItemMap) PushFront(key string,
 	if linkedList, exists := this.Get(key); exists {
 		linkedList.PushFront(item)
 	} else {
-		//log.Println("new key:", key)
+		//log.Info("new key:", key)
 		safeList := &SafeLinkedList{L: list.New()}
 		safeList.L.PushFront(item)
 
@@ -179,7 +180,7 @@ func (this *GraphItemMap) KeysByIndex(idx int) []string {
 func init() {
 	size := g.CACHE_TIME / g.FLUSH_DISK_STEP
 	if size < 0 {
-		log.Panicf("store.init, bad size %d\n", size)
+		log.Infof("store.init, bad size %d\n", size)
 	}
 
 	GraphItems = &GraphItemMap{

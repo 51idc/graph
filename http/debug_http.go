@@ -9,9 +9,9 @@ import (
 
 	cmodel "github.com/open-falcon/common/model"
 	cutils "github.com/open-falcon/common/utils"
-	"github.com/open-falcon/graph/api"
-	"github.com/open-falcon/graph/g"
-	"github.com/open-falcon/graph/store"
+	"github.com/anchnet/graph/api"
+	"github.com/anchnet/graph/g"
+	"github.com/anchnet/graph/store"
 )
 
 func configDebugRoutes() {

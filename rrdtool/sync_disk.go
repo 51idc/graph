@@ -3,12 +3,12 @@ package rrdtool
 import (
 	"io"
 	"io/ioutil"
-	"log"
+	log "github.com/cihub/seelog"
 	"os"
 	"time"
 
-	"github.com/open-falcon/graph/g"
-	"github.com/open-falcon/graph/store"
+	"github.com/anchnet/graph/g"
+	"github.com/anchnet/graph/store"
 	"github.com/toolkits/file"
 )
 
@@ -48,7 +48,7 @@ func syncDisk() {
 			FlushRRD(idx, false)
 			idx += 1
 		case <-Out_done_chan:
-			log.Println("cron recv sigout and exit...")
+			log.Info("cron recv sigout and exit...")
 			return
 		}
 	}

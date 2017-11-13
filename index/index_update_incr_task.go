@@ -3,7 +3,7 @@ package index
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	log "github.com/cihub/seelog"
 	"time"
 
 	nsema "github.com/toolkits/concurrent/semaphore"
@@ -11,8 +11,8 @@ import (
 
 	cmodel "github.com/open-falcon/common/model"
 	cutils "github.com/open-falcon/common/utils"
-	"github.com/open-falcon/graph/g"
-	proc "github.com/open-falcon/graph/proc"
+	"github.com/anchnet/graph/g"
+	proc "github.com/anchnet/graph/proc"
 )
 
 const (
@@ -47,7 +47,7 @@ func updateIndexIncr() int {
 
 	dbConn, err := g.GetDbConn("UpdateIndexIncrTask")
 	if err != nil {
-		log.Println("[ERROR] get dbConn fail", err)
+		log.Info("[ERROR] get dbConn fail", err)
 		return ret
 	}
 
@@ -89,7 +89,7 @@ func maybeUpdateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 	{
 		err := conn.QueryRow("SELECT id FROM endpoint WHERE endpoint = ?", endpoint).Scan(&endpointId)
 		if err != nil && err != sql.ErrNoRows {
-			log.Println(endpoint, err)
+			log.Info(endpoint, err)
 			return err
 		}
 		proc.IndexUpdateIncrDbEndpointSelectCnt.Incr()
@@ -98,14 +98,14 @@ func maybeUpdateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 			sqlStr := "INSERT INTO endpoint(endpoint, ts, t_create) VALUES (?, ?, now())" + sqlDuplicateString
 			ret, err := conn.Exec(sqlStr, endpoint, ts)
 			if err != nil {
-				log.Println(err)
+				log.Info(err)
 				return err
 			}
 			proc.IndexUpdateIncrDbEndpointInsertCnt.Incr()
 
 			endpointId, err = ret.LastInsertId()
 			if err != nil {
-				log.Println(err)
+				log.Info(err)
 				return err
 			}
 		} else { // do not update
@@ -123,7 +123,7 @@ func maybeUpdateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 			err := conn.QueryRow("SELECT id FROM tag_endpoint WHERE tag = ? and endpoint_id = ?",
 				tag, endpointId).Scan(&tagEndpointId)
 			if err != nil && err != sql.ErrNoRows {
-				log.Println(tag, endpointId, err)
+				log.Info(tag, endpointId, err)
 				return err
 			}
 			proc.IndexUpdateIncrDbTagEndpointSelectCnt.Incr()
@@ -132,14 +132,14 @@ func maybeUpdateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 				sqlStr := "INSERT INTO tag_endpoint(tag, endpoint_id, ts, t_create) VALUES (?, ?, ?, now())" + sqlDuplicateString
 				ret, err := conn.Exec(sqlStr, tag, endpointId, ts)
 				if err != nil {
-					log.Println(err)
+					log.Info(err)
 					return err
 				}
 				proc.IndexUpdateIncrDbTagEndpointInsertCnt.Incr()
 
 				tagEndpointId, err = ret.LastInsertId()
 				if err != nil {
-					log.Println(err)
+					log.Info(err)
 					return err
 				}
 			}
@@ -160,7 +160,7 @@ func maybeUpdateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 		err := conn.QueryRow("SELECT id,step,type FROM endpoint_counter WHERE endpoint_id = ? and counter = ?",
 			endpointId, counter).Scan(&endpointCounterId, &step, &dstype)
 		if err != nil && err != sql.ErrNoRows {
-			log.Println(counter, endpointId, err)
+			log.Info(counter, endpointId, err)
 			return err
 		}
 		proc.IndexUpdateIncrDbEndpointCounterSelectCnt.Incr()
@@ -170,14 +170,14 @@ func maybeUpdateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 				" ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id),ts=VALUES(ts), step=VALUES(step),type=VALUES(type)"
 			ret, err := conn.Exec(sqlStr, endpointId, counter, item.Step, item.DsType, ts)
 			if err != nil {
-				log.Println(err)
+				log.Info(err)
 				return err
 			}
 			proc.IndexUpdateIncrDbEndpointCounterInsertCnt.Incr()
 
 			endpointCounterId, err = ret.LastInsertId()
 			if err != nil {
-				log.Println(err)
+				log.Info(err)
 				return err
 			}
 		} else {
@@ -186,7 +186,7 @@ func maybeUpdateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 					item.Step, item.DsType, endpointCounterId)
 				proc.IndexUpdateIncrDbEndpointCounterUpdateCnt.Incr()
 				if err != nil {
-					log.Println(err)
+					log.Info(err)
 					return err
 				}
 			}

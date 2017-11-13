@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	cutils "github.com/open-falcon/common/utils"
-	"github.com/open-falcon/graph/proc"
-	"github.com/open-falcon/graph/store"
+	"github.com/anchnet/graph/proc"
+	"github.com/anchnet/graph/store"
 )
 
 func configProcRoutes() {

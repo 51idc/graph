@@ -2,14 +2,14 @@ package http
 
 import (
 	"encoding/json"
-	"log"
+	log "github.com/cihub/seelog"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
 
-	"github.com/open-falcon/graph/g"
-	"github.com/open-falcon/graph/rrdtool"
+	"github.com/anchnet/graph/g"
+	"github.com/anchnet/graph/rrdtool"
 )
 
 type Dto struct {
@@ -74,7 +74,7 @@ func (ln TcpKeepAliveListener) Accept() (c net.Conn, err error) {
 
 func Start() {
 	if !g.Config().Http.Enabled {
-		log.Println("http.Start warning, not enabled")
+		log.Info("http.Start warning, not enabled")
 		return
 	}
 
@@ -93,11 +93,11 @@ func Start() {
 		Addr:           addr,
 		MaxHeaderBytes: 1 << 30,
 	}
-	log.Println("http listening", addr)
+	log.Info("http listening", addr)
 
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalln(err)
+		log.Error(err)
 		return
 	}
 
@@ -107,7 +107,7 @@ func Start() {
 
 	select {
 	case <-Close_chan:
-		log.Println("http recv sigout and exit...")
+		log.Info("http recv sigout and exit...")
 		l.Close()
 		Close_done_chan <- 1
 		return

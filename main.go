@@ -3,47 +3,48 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/open-falcon/graph/api"
-	"github.com/open-falcon/graph/g"
-	"github.com/open-falcon/graph/http"
-	"github.com/open-falcon/graph/index"
-	"github.com/open-falcon/graph/rrdtool"
+	log "github.com/cihub/seelog"
+
+	"github.com/anchnet/graph/api"
+	"github.com/anchnet/graph/g"
+	"github.com/anchnet/graph/http"
+	"github.com/anchnet/graph/index"
+	"github.com/anchnet/graph/rrdtool"
 )
 
 func start_signal(pid int, cfg *g.GlobalConfig) {
 	sigs := make(chan os.Signal, 1)
-	log.Println(pid, "register signal notify")
+	log.Info(pid, "register signal notify")
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	for {
 		s := <-sigs
-		log.Println("recv", s)
+		log.Info("recv", s)
 
 		switch s {
 		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
-			log.Println("gracefull shut down")
+			log.Info("gracefull shut down")
 			if cfg.Http.Enabled {
 				http.Close_chan <- 1
 				<-http.Close_done_chan
 			}
-			log.Println("http stop ok")
+			log.Info("http stop ok")
 
 			if cfg.Rpc.Enabled {
 				api.Close_chan <- 1
 				<-api.Close_done_chan
 			}
-			log.Println("rpc stop ok")
+			log.Info("rpc stop ok")
 
 			rrdtool.Out_done_chan <- 1
 			rrdtool.FlushAll(true)
-			log.Println("rrdtool stop ok")
+			log.Info("rrdtool stop ok")
 
-			log.Println(pid, "exit")
+			log.Info(pid, "exit")
 			os.Exit(0)
 		}
 	}
@@ -66,6 +67,8 @@ func main() {
 
 	// global config
 	g.ParseConfig(*cfg)
+	//init seelog
+	g.InitSeeLog()
 	// init db
 	g.InitDB()
 	// rrdtool before api for disable loopback connection

@@ -3,16 +3,17 @@ package index
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
+
+	log "github.com/cihub/seelog"
 
 	nsema "github.com/toolkits/concurrent/semaphore"
 	ntime "github.com/toolkits/time"
 
+	"github.com/anchnet/graph/g"
+	proc "github.com/anchnet/graph/proc"
 	cmodel "github.com/open-falcon/common/model"
 	cutils "github.com/open-falcon/common/utils"
-	"github.com/open-falcon/graph/g"
-	proc "github.com/open-falcon/graph/proc"
 )
 
 const (
@@ -50,7 +51,7 @@ func UpdateIndexOne(endpoint string, metric string, tags map[string]string, dsty
 
 	dbConn, err := g.GetDbConn("UpdateIndexIncrTask")
 	if err != nil {
-		log.Println("[ERROR] make dbConn fail", err)
+		log.Info("[ERROR] make dbConn fail", err)
 		return err
 	}
 
@@ -69,7 +70,7 @@ func UpdateIndexAllByDefaultStep() {
 func UpdateIndexAll(updateStepInSec int64) {
 	// 减少任务积压,但高并发时可能无效(AvailablePermits不是线程安全的)
 	if semaIndexUpdateAllTask.AvailablePermits() <= 0 {
-		log.Println("updateIndexAll, concurrent not avaiable")
+		log.Info("updateIndexAll, concurrent not avaiable")
 		return
 	}
 
@@ -79,7 +80,7 @@ func UpdateIndexAll(updateStepInSec int64) {
 	startTs := time.Now().Unix()
 	cnt := updateIndexAll(updateStepInSec)
 	endTs := time.Now().Unix()
-	log.Printf("UpdateIndexAll, lastStartTs %s, updateStepInSec %d, lastTimeConsumingInSec %d\n",
+	log.Infof("UpdateIndexAll, lastStartTs %s, updateStepInSec %d, lastTimeConsumingInSec %d\n",
 		ntime.FormatTs(startTs), updateStepInSec, endTs-startTs)
 
 	// statistics
@@ -99,7 +100,7 @@ func updateIndexAll(updateStepInSec int64) int {
 
 	dbConn, err := g.GetDbConn("UpdateIndexIncrTask")
 	if err != nil {
-		log.Println("[ERROR] make dbConn fail", err)
+		log.Info("[ERROR] make dbConn fail", err)
 		return ret
 	}
 
@@ -151,13 +152,13 @@ func updateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 		sqlStr := "INSERT INTO endpoint(endpoint, ts, t_create) VALUES (?, ?, now())" + sqlDuplicateString
 		ret, err := conn.Exec(sqlStr, endpoint, ts)
 		if err != nil {
-			log.Println(err)
+			log.Info(err)
 			return err
 		}
 
 		endpointId, err = ret.LastInsertId()
 		if err != nil {
-			log.Println(err)
+			log.Info(err)
 			return err
 		}
 	}
@@ -170,13 +171,13 @@ func updateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 
 			ret, err := conn.Exec(sqlStr, tag, endpointId, ts)
 			if err != nil {
-				log.Println(err)
+				log.Info(err)
 				return err
 			}
 
 			_, err = ret.LastInsertId()
 			if err != nil {
-				log.Println(err)
+				log.Info(err)
 				return err
 			}
 		}
@@ -192,13 +193,13 @@ func updateIndexFromOneItem(item *cmodel.GraphItem, conn *sql.DB) error {
 		sqlStr := "INSERT INTO endpoint_counter(endpoint_id,counter,step,type,ts,t_create) VALUES (?,?,?,?,?,now())" + sqlDuplicateString
 		ret, err := conn.Exec(sqlStr, endpointId, counter, item.Step, item.DsType, ts)
 		if err != nil {
-			log.Println(err)
+			log.Info(err)
 			return err
 		}
 
 		_, err = ret.LastInsertId()
 		if err != nil {
-			log.Println(err)
+			log.Info(err)
 			return err
 		}
 	}
